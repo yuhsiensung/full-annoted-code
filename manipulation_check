@@ -7,22 +7,50 @@ library(stringr)
 library(xlsx)
 library(varhandle)
 output<-import("Data.xlsx")
-dataclean<-import("data_clean(2).xlsx",setclass = 'data.table')
+dataclean<-import("data_clean2.xlsx",setclass = 'data.table')
 
-#####entered wrong number of digits or non-numbers in year and zip
+
+
+####Begin with general data correctionse and creations of user defined functions
+####creation of statistical models and graphing begin on line XXXXXXXXXX
+
+
+#####Add attional identification of low attention
+#####for respondents that entered the wrong number of digits or non-numbers in year born and zip code
 
 output$lowattention[!check.numeric(v = output$Q3)|(nchar(output$Q3,allowNA = TRUE)!=4)]<-1
 
 output$lowattention[!check.numeric(v = output$Q4)|(nchar(output$Q4,allowNA = TRUE)!=5)]<-1
-sum(output$lowattention)
+
+####create corrected variable for net score on manipulation checks, add 1 for checking 
+####correct options and subtract 1 for checking incorrect boxes
+####there are 4 possible correct options and 3 possible incorrect options
+
+output$group<-ifelse(is.na(output[,32]),ifelse(is.na(output[,36]),
+                                               ifelse(is.na(output[,40]),
+                                                      ifelse(is.na(output[,44]),
+                                                             ifelse(is.na(output[,48]),
+                                                                    ifelse(is.na(output[,52]),
+                                                                           ifelse(is.na(output[,56]),
+                                                                                  ifelse(is.na(output[,60]),
+                                                                                         ifelse(is.na(output[,64]),NA,9),8),7),6),5),4),3),2),1)
 
 
-####create variable for manipulation check
-dataclean<-cbind(dataclean,(as.numeric(grepl('1',output$Q13))+as.numeric(grepl('2',output$Q13))+
-  as.numeric(grepl('4',output$Q13))+as.numeric(grepl('6',output$Q13))-
-  (as.numeric(grepl('3',output$Q13))+as.numeric(grepl('5',output$Q13))+
-     as.numeric(grepl('7',output$Q13)))))
-dataclean$lowattention<-output$lowattention
-colnames(dataclean)[38]<-'netmanipcheck'
+output$treatment1<-NA
+output$treatment2<-NA
+output$treatment3<-NA
+output$treatment4<-NA
+for(i in 1:9){
+  output[which(output$group==i),103:106]<-output[which(output$group==i),(28+i*4):(31+i*4)]
+}
 
-write.xlsx(dataclean,"data_clean2.xlsx", row.names = FALSE)
+output<-cbind(output,(as.numeric(grepl('1',output$Q13))+as.numeric(grepl('2',output$Q13))+
+                        as.numeric(grepl('4',output$Q13))+as.numeric(grepl('6',output$Q13))-
+                        (as.numeric(grepl('3',output$Q13))+as.numeric(grepl('5',output$Q13))+
+                           as.numeric(grepl('7',output$Q13)))))
+
+
+
+for(j in 1:nrow(output)){
+  output[j,c(100,107)]->dataclean[which(dataclean$duration_survey%in%output[j,6]&dataclean$group%in%output[j,102]&dataclean$treatment1%in%output[j,103]&dataclean$treatment2%in%output[j,104]),c(19,38)]
+}
