@@ -1,0 +1,28 @@
+rm(list=ls())
+library(XML)
+setwd("c:/Users/djl/Documents/summer project")
+library(rio)
+library(data.table)
+library(stringr)
+library(xlsx)
+library(varhandle)
+output<-import("Data.xlsx")
+dataclean<-import("data_clean(2).xlsx",setclass = 'data.table')
+
+#####entered wrong number of digits or non-numbers in year and zip
+
+output$lowattention[!check.numeric(v = output$Q3)|(nchar(output$Q3,allowNA = TRUE)!=4)]<-1
+
+output$lowattention[!check.numeric(v = output$Q4)|(nchar(output$Q4,allowNA = TRUE)!=5)]<-1
+sum(output$lowattention)
+
+
+####create variable for manipulation check
+dataclean<-cbind(dataclean,(as.numeric(grepl('1',output$Q13))+as.numeric(grepl('2',output$Q13))+
+  as.numeric(grepl('4',output$Q13))+as.numeric(grepl('6',output$Q13))-
+  (as.numeric(grepl('3',output$Q13))+as.numeric(grepl('5',output$Q13))+
+     as.numeric(grepl('7',output$Q13)))))
+dataclean$lowattention<-output$lowattention
+colnames(dataclean)[38]<-'netmanipcheck'
+
+write.xlsx(dataclean,"data_clean2.xlsx", row.names = FALSE)
