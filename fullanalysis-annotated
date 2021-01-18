@@ -544,31 +544,8 @@ trustdata$covid_family<-ifelse(trustdata$covid_family==2,0,ifelse(trustdata$covi
 summary(lm(treatment4~covid_family+trust_cdc+trust_president,data=trustdata))
 
 
+########
 
-#i<-1
-#for(i in 1:9){
-
-#sd<-colStdevs(dataclean[dataclean$group==i,c(22:25)])
-#graphdataind<-rbind(graphdataind,cbind(colMeans(dataclean[dataclean$group==i,c(22:25)],na.rm = TRUE),paste0('Group ',i),
-#                                       c("Self-Quarantine","Release Detainees","NCAA Football",
-#                                         'In-Person Ballots')))
-
-#if(i>8){next}
-#for(j in (i+1):9){
-#exclude<-1:9  
-#exclude<-exclude[-c(i,j)]
-
-#graphdataint<-rbind(graphdataint,cbind(condinterval(dataclean,i,excludedgroups = exclude,bootnum = 1000)[9:12,]
-#                                       ,paste0("Groups ",i,' & ',j),
-#                    c("Self-Quarantine","Release Detainees","NCAA Football",
-#                                                        'In-Person Ballots'))) 
-
-
-
-#}
-#}
-#graphdataind<-graphdataind[-1,]
-#graphdataint<-graphdataint[-1,]
 groups<-c('Group 1','Group 2','Group 3','Group 4','Group 5','Group 6','Group 7',
           'Group 8','Group 9')
 Treatment<-c('Self-Quarantine','Release Detainees','NCAA Football','In-Person Ballots')
