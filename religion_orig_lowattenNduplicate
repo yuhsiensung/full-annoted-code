@@ -1,0 +1,116 @@
+rm(list=ls())
+library(XML)
+setwd("c:/Users/djl/Documents/summer project")
+library(rio)
+library(data.table)
+library(stringr)
+library(xlsx)
+output<-import("Data.xlsx")
+
+
+output$lowattention<-1
+output$religion<-9
+output$misspell<-0
+output$Q11<-tolower(output$Q11)
+
+
+#######religion coding############
+##################################
+#1  == catholic
+#2  == protestant
+#3  == islam
+#4  == mormon
+#5  == jewish
+#6  == not religious, ironic/mocking responses
+#7  == other, multiple, earth based
+#8  == east asian religions
+#9  == NA, dont know, invalid enty
+
+#do not adjust order or collapse searched. order at time reflects overlapping patterns in names
+#of different religions/responses
+
+output$lowattention[grep('divine feminine|unity|hellenic pantheon|rastafarian|other|spirit|zoro|pantheist|unitarian',output$Q11)]<-0
+output$religion[grep('divine feminine|unity|hellenic pantheon|rastafarian|other|spirit|zoro|pantheist|unitarian',output$Q11)]<-7
+
+
+output$lowattention[grep('non$|nome|believe in that|nonr|no preference|satanist|nun|no special one|i dont practice anything|no particular one|have one|n0ne|dreward|no specific|no formal|baconist|affiliation|spagettie monster|no specific|agonostic|agnoatic|applicable|agnostic|athe|none|relig|nothing|recov|athi|spirit|pastafarian',output$Q11)]<-0
+output$religion[grep('non$|nome|believe in that|nonr|no preference|satanist|nun|no special one|i dont practice anything|no particular one|have one|n0ne|dreward|no specific|no formal|baconist|affiliation|spagettie monster|no specific|agonostic|agnoatic|applicable|agnostic|athe|none|relig|nothing|recov|athi|spirit|pastafarian',output$Q11)]<-6
+
+
+output$lowattention[grep('calothic|roman|catolic|catholic|cath|orthodox',output$Q11)]<-0
+output$religion[grep('calothic|roman|catolic|catholic|cath|orthodox',output$Q11)]<-1
+
+output$misspell[which(output$lowattention==1&(agrepl('catholic',output$Q11,max.distance = 2)))]<-1
+output$religion[which(output$lowattention==1&(agrepl('catholic',output$Q11,max.distance = 2)))]<-1
+output$lowattention[which(output$lowattention==1&(agrepl('catholic',output$Q11,max.distance = 2)))]<-0
+
+
+output$lowattention[grep('congregationalist|prodacen|born again|bbcfi|pca|nazerine|quaker|litheran|assemblies of god|santification|bapsital|apost|chirtsin|naza|adven|prot|christ|bapt|method|luth|episc|angli|pene|pent|pres|evang|church of christ|church of god|denom',
+                         output$Q11)]<-0
+output$religion[grep('congregationalist|prodacen|born again|bbcfi|pca|nazerine|quaker|litheran|assemblies of god|santification|bapsital|apost|chirtsin|naza|adven|prot|lotheran|christ|bapt|method|luth|episc|angli|pene|pent|pres|evang|church of christ|church of god|denom',
+                     output$Q11)]<-2
+
+
+
+#####################################misspell################
+output$misspell[grep('ejudi|calothic|prodacen|judisiam|judiasm|sickh|litheran|bapsital|agonostic|agnoatic|chirtsin|catolic|pene|luthen|cathl|penta|pento|yicost|penti|proti|prota|athi|presbi|presy|lotheran'
+                     ,output$Q11)]<-1
+output$misspell[which(output$lowattention==1&grepl('ba.+[p|t]ist',output$Q11))]<-1
+output$religion[which(output$lowattention==1&grepl('ba.+[p|t]ist',output$Q11))]<-2
+output$lowattention[grepl('ba.+[p|t]ist',output$Q11)]<-0
+output$misspell[which(output$lowattention==1&(agrepl('christian',output$Q11,max.distance = 3)|
+                                           agrepl('protest',output$Q11,max.distance = 2)))]<-1
+output$religion[which(output$lowattention==1&(agrepl('christian',output$Q11,max.distance = 3)|
+                                                agrepl('protest',output$Q11,max.distance = 2)))]<-2
+output$lowattention[which(output$lowattention==1&(agrepl('christian',output$Q11,max.distance = 3)|
+                                                agrepl('protest',output$Q11,max.distance = 2)))]<-0
+
+
+output$lowattention[grep('islam|musl',
+                         output$Q11)]<-0
+output$religion[grep('islam|musl',
+                     output$Q11)]<-3
+
+output$lowattention[grep('sickh|tao|bud|sikh|hind',
+                         output$Q11)]<-0
+output$religion[grep('sickh|tao|bud|sikh|hind',
+                     output$Q11)]<-8
+
+
+
+output$lowattention[grep('day s|morm|lds',
+                         output$Q11)]<-0
+output$religion[grep('day s|morm|lds',
+                     output$Q11)]<-4
+
+
+
+output$lowattention[grep('ejudi|judisiam|judiasm|messianic|hebrew|jew|judaism',output$Q11)]<-0
+output$religion[grep('ejudi|judisiam|judiasm|messianic|hebrew|jew|judaism',output$Q11)]<-5
+
+output$lowattention[grep('jewish and|and budd|dudeism|wic|paga|jehov',output$Q11)]<-0
+output$religion[grep('jewish and|and budd|dudeism|wic|paga|jehov',output$Q11)]<-7
+
+output$religion[grep('but do not follow anything|so none i guess',output$Q11)]<-6
+
+
+
+suspect<-output[(output$lowattention==1|output$misspell==1),]
+suspect<-suspect[-which(suspect$Q13=="1,2,4,6"),]
+suspect<-suspect[-which((suspect$Q13=="1,2,4")|(suspect$Q13=="2,4,6")|(suspect$Q13=="1,2,6")|(suspect$Q13=="1,4,6")),]
+
+output$lowattention<-0
+output$lowattention[grep(paste0(paste0(as.character(suspect$ResponseId),sep = "|",
+                                       collapse = ""),"lkjljklzzzz",collapse = ""),
+                         output$ResponseId)]<-1
+output<-subset(output,select = -c(misspell))
+
+write.xlsx(output,"Data.xlsx", row.names = FALSE)
+
+dupes<-output[which(duplicated(output$IPAddress)),]
+
+
+dupes<-output[grep(paste0(paste0(dupes$IPAddress,sep ="|",collapse = ""),"zzzzzzz",collapse = ""),output$IPAddress),]
+
+
+write.xlsx(dupes,"duplicates.xlsx",row.names = FALSE)
