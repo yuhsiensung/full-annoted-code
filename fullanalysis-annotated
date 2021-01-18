@@ -15,6 +15,11 @@ dataclean<-dataclean[-which(grepl('NA',dataclean$treatment4)),]
 
 dataclean$lowattention[which(dataclean$duplicate==1)]<-1
 summary(as.factor(dataclean$treatment1))
+
+dataclean$treatment2 <-as.numeric(dataclean$treatment2)
+dataclean$treatment3 <-as.numeric(dataclean$treatment3)
+dataclean$treatment4 <-as.numeric(dataclean$treatment4)
+
 dataclean$treatment1<-(dataclean$treatment1*(-1))+8
 dataclean$treatment2<-(dataclean$treatment2*(-1))+8
 dataclean$treatment3<-(dataclean$treatment3*(-1))+8
@@ -228,7 +233,9 @@ mp3h<-condinterval(dataclean[dataclean$netmanipcheck>0,],c(1,2,5,6),c(9),bootnum
 
 
 ###################graphs for manipulation checks with and without low attention removed
-
+###
+###Treatment effects under different manipuation checks, from zero error to three errorfs
+###
 
 mainplot<-cbind(ref = as.factor(c(1,1,1,1,2,2,2,2,3,3,3,3)),Treatment = as.factor(c(1,2,3,4,1,2,3,4,1,2,3,4)),
                 rbind(rbind(mp1e[9,],NA,NA,mp1e[12,]),mp2e[9:12,],mp3e[9:12,],
@@ -319,7 +326,7 @@ ggsave('lowattention.jpeg',width = 7,height = 7)
 
 ####################################################
 #########INTERACTIONS##############################
-
+## do we see different trends when interacting different types of framings?
 #row  
 ref<-as.factor(c(3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,
                  1,1,1,1,2,2,2,2,5,5,5,5,6,6,6,6,
@@ -403,9 +410,8 @@ ggsave('interact.jpeg', width = 7, height = 7)
 
 #########################################################
 ########PID#############################################
-
-
-
+## Do we see different trends by partisan groups and the degree their political ideologies?
+##
 pid1<-bygroups(dataclean,c(1,2,3,4),excludedgroups = 9,listdiff = list(pid=c(1,2,3)),listcompare = list(pid = c(6,7,8)),bootnum = 1000)
 pid1<-rbind(pid1[1,],NA,NA,pid1[4,],pid1[5,],NA,NA,pid1[8],pid1[9,],NA,NA,pid1[12,])
 
