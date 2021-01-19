@@ -13,6 +13,72 @@ dataclean<-dataclean[-which(grepl('NA',dataclean$treatment2)),]
 dataclean<-dataclean[-which(grepl('NA',dataclean$treatment3)),]
 dataclean<-dataclean[-which(grepl('NA',dataclean$treatment4)),]
 
+######## demographics #######
+### Age 
+table(dataclean$birth_year)
+summary(dataclean$birth_year)
+dataclean$birth_year <- as.numeric(dataclean$birth_year)
+dataclean$age <- 2020 - dataclean$birth_year
+summary(dataclean$age)
+
+
+## Education 
+dataclean$education <- as.factor(dataclean$education)
+dataclean$education <-ifelse (dataclean$education == "1", "No high school",
+                          ifelse(dataclean$education =="2", "High school", 
+                                 ifelse(dataclean$education == "3", "Some college w/degree or associate degree",
+                                        ifelse(dataclean$education == "4", "Some college w/degree or associate degree", 
+                                               ifelse(dataclean$education == "5", "Bachelor's degree or higher",
+                                                      ifelse(dataclean$education == "6", "Bachelor's degree or higher", 
+                                                             ifelse(dataclean$education == "7", "Bachelor's degree or higher", "Other")))))))
+
+table2 <- table(dataclean$education)
+prop.table(table2)
+
+### Gender 
+dataclean$gender <- as.factor(dataclean$gender)
+dataclean$gender <- ifelse(dataclean$gender == "1", "M",
+                    ifelse(dataclean$gender == "2", "F", 
+                           ifelse(dataclean$gender == "3", "Other", NA)))
+
+table3 <- table(dataclean$gender)
+prop.table(table3)
+
+
+### Political Party
+## party ID
+####  1-3 is democratic. 
+####  5 independent. 
+####  6-8 republicaa
+####  9- other/na/dont know. 
+dataclean$pid <- as.factor(dataclean$pid)
+dataclean$party <-ifelse (dataclean$pid == "1", "Democrat",
+                  ifelse(dataclean$pid =="2", "Democrat", 
+                         ifelse(dataclean$pid == "3", "Democrat",
+                                ifelse(dataclean$pid == "5", "Independent", 
+                                       ifelse(dataclean$pid == "6", "Republican",
+                                              ifelse(dataclean$pid == "7", "Republican",
+                                                     ifelse(dataclean$pid == "8", "Republican", "Other")))))))
+
+table4 <- table(dataclean$party)
+prop.table(table4)
+
+
+#### Ethnicity
+dataclean$race <-ifelse (dataclean$ethnicity == "1", "White",
+                 ifelse(dataclean$ethnicity =="2", "Black", 
+                        ifelse(dataclean$ethnicity == "3", "Hispanic",
+                               ifelse(dataclean$ethnicity == "4", "Asian", 
+                                      ifelse(dataclean$ethnicity == "5", "Native American",
+                                             ifelse(dataclean$ethnicity == "6", "Middle Eastern", "Other"))))))
+table5 <- table(dataclean$race)
+prop.table(table5)
+##################
+##################
+
+
+
+
 dataclean$lowattention[which(dataclean$duplicate==1)]<-1
 summary(as.factor(dataclean$treatment1))
 dataclean$treatment1<-(dataclean$treatment1*(-1))+8
